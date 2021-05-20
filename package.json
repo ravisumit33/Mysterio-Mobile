@@ -1,8 +1,8 @@
 {
-  "name": "io.cordova.hellocordova",
-  "displayName": "HelloCordova",
+  "name": "io.cordova.mysterio",
+  "displayName": "Mysterio",
   "version": "1.0.0",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "description": "Mysterio is an anonymous chat web app. Talk to strangers online. No login. No sign up. Anonymous chat rooms to talk to people of your interest.Fast and secure with encrypted chat. Best site to chat anonymously.",
   "main": "index.js",
   "dependencies": {
     "@material-ui/core": "^4.11.4",
@@ -53,7 +53,7 @@
   "keywords": [
     "ecosystem:cordova"
   ],
-  "author": "Apache Cordova Team",
+  "author": "Sumit Kumar",
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-android": "^9.1.0",

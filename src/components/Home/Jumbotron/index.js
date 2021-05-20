@@ -9,8 +9,10 @@ import { observer } from 'mobx-react-lite';
 const useStyle = makeStyles((theme) => ({
   jumbotron: {
     display: 'flex',
+    flexDirection: 'column',
     position: 'relative',
     width: '100%',
+    minHeight: '60vh',
   },
   bg: {
     position: 'absolute',
@@ -23,7 +25,7 @@ const useStyle = makeStyles((theme) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   gridRoot: {
-    height: '100%',
+    flex: 1,
   },
   quickChatImg: {
     height: 300,

@@ -48,6 +48,5 @@ export const fetchUrl = (url, data) => {
     const origin = isDevEnv() ? '' : MysterioOrigin;
     completeUrl = origin + url;
   }
-  console.log(completeUrl);
   return fetch(completeUrl, data).then((response) => response.json());
 };
