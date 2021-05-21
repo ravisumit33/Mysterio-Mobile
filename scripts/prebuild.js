@@ -80,19 +80,25 @@ function execPostReactBuild(buildFolderPath, outputFolderPath) {
 const P = () => {
     const projectPath = path.resolve(process.cwd(), './node_modules/.bin/react-scripts');
     return new Promise((resolve, reject) => {
-        exec(`${projectPath} build`,
-            (error) => {
+        execPostReactBuild(path.resolve(__dirname, '../Mysterio'), path.join(__dirname, '../'))
+            .then(() => {
+                exec(`${projectPath} build`, (error) => {
+                    if (rejectError(error, reject))
+                        return;
+                    execPostReactBuild(path.resolve(__dirname, '../build/'), path.join(__dirname, '../www/'))
+                        .then((s) => {
+                            console.log(s);
+                            resolve(s);
+                        })
+                        .catch((e) => {
+                            if (rejectError(e, reject))
+                                return;
+                        });
+                    });
+            })
+            .catch((error) => {
                 if (rejectError(error, reject))
                     return;
-                execPostReactBuild(path.resolve(__dirname, '../build/'), path.join(__dirname, '../www/'))
-                    .then((s) => {
-                        console.log(s);
-                        resolve(s);
-                    })
-                    .catch((e) => {
-                        if (rejectError(error || stderror, reject))
-                            return;
-                    });
             });
     });
 };
