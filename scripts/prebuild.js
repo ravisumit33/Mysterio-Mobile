@@ -27,22 +27,22 @@ function rejectError(error, reject) {
 function execPreReactBuild(mysterioPath, rootPath) {
     return new Promise((resolve, reject) => {
         exec('cd ' + mysterioPath + ' && git ls-remote origin refs/heads/master', (error, stdout, stderror) => {
-            if (rejectError(error || stderror))
+            if (rejectError(error || stderror, reject))
                 return;
             console.log(stdout);
             var remoteHead = stdout.split('\t')[0];
             console.log(remoteHead);
             exec('git rev-parse HEAD', (error, stdout, stderror) => {
-                if (rejectError(error || stderror))
+                if (rejectError(error || stderror, reject))
                     return;
                 console.log(stdout);
                 var localHead = stdout;
                 exec('cd ..', (error, stdout, stderror) => {
-                    if (rejectError(error || stderror))
+                    if (rejectError(error || stderror, reject))
                         return;
                     if (localHead !== remoteHead) {
-                        exec('git submodule foreach git pull origin master && git commit -am "Update Mysterio to latest"', (error, stdout, stderror) => {
-                            if (rejectError(error || stderror))
+                        exec('git submodule foreach git pull origin master && git add . && git commit -am "Update Mysterio to latest"', (error, stdout, stderror) => {
+                            if (rejectError(error || stderror, reject))
                                 return;
                             console.log("Mysterio updated");
                             resolve();
@@ -60,7 +60,7 @@ function execPostReactBuild(buildFolderPath, outputFolderPath) {
         if (fs.existsSync(buildFolderPath)) {
             if (fs.existsSync(outputFolderPath)) {
                 rimraf(outputFolderPath, (err) => {
-                    if (rejectError(error || stderror))
+                    if (rejectError(error || stderror, reject))
                         return;
                     renameOutputFolder(buildFolderPath, outputFolderPath)
                         .then(val => resolve(val))
@@ -82,7 +82,7 @@ const P = () => {
     return new Promise((resolve, reject) => {
         exec(`${projectPath} build`,
             (error) => {
-                if (rejectError(error))
+                if (rejectError(error, reject))
                     return;
                 execPostReactBuild(path.resolve(__dirname, '../build/'), path.join(__dirname, '../www/'))
                     .then((s) => {
@@ -90,7 +90,7 @@ const P = () => {
                         resolve(s);
                     })
                     .catch((e) => {
-                        if (rejectError(error || stderror))
+                        if (rejectError(error || stderror, reject))
                             return;
                     });
             });
