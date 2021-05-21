@@ -1,7 +1,6 @@
 const path = require('path');
 const { exec } = require('child_process');
 const fs = require('fs');
-const fse = require('fs-extra');
 const rimraf = require('rimraf');
 
 function renameOutputFolder(buildFolderPath, outputFolderPath) {
@@ -15,7 +14,6 @@ function renameOutputFolder(buildFolderPath, outputFolderPath) {
         });
     });
 }
-
 function rejectError(error, reject) {
     if (error) {
         console.error(error);
@@ -24,6 +22,7 @@ function rejectError(error, reject) {
     }
     return false;
 }
+
 
 function execPreReactBuild(mysterioPath, rootPath) {
     return new Promise((resolve, reject) => {
@@ -50,9 +49,9 @@ function execPreReactBuild(mysterioPath, rootPath) {
                         });
                     }
 
-                });                    
+                });
             });
-        }); 
+        });
     });
 }
 
@@ -81,9 +80,9 @@ function execPostReactBuild(buildFolderPath, outputFolderPath) {
 const P = () => {
     const projectPath = path.resolve(process.cwd(), './node_modules/.bin/react-scripts');
     return new Promise((resolve, reject) => {
-        execPreReactBuild(path.resolve(__dirname, '../Mysterio'), path.join(__dirname, '../'), (error, stdout, stderror) => {
-            exec(`${projectPath} build`, (error) => {
-                if (rejectError(error || stderror))
+        exec(`${projectPath} build`,
+            (error) => {
+                if (rejectError(error))
                     return;
                 execPostReactBuild(path.resolve(__dirname, '../build/'), path.join(__dirname, '../www/'))
                     .then((s) => {
@@ -94,9 +93,9 @@ const P = () => {
                         if (rejectError(error || stderror))
                             return;
                     });
-                });
-        });
+            });
     });
 };
+
 
 P().then(() => console.log("complete")).catch((error) => console.error(error));
