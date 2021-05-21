@@ -1,6 +1,7 @@
 const path = require('path');
 const { exec } = require('child_process');
 const fs = require('fs');
+const fse = require('fs-extra');
 const rimraf = require('rimraf');
 
 function renameOutputFolder(buildFolderPath, outputFolderPath) {
@@ -26,29 +27,29 @@ function rejectError(error, reject) {
 
 function execPreReactBuild(mysterioPath, rootPath) {
     return new Promise((resolve, reject) => {
-        exec('cd ' + mysterioPath + ' && git ls-remote origin refs/heads/master', (error, stdout, stderror) => {
-            if (rejectError(error || stderror, reject))
+        exec('cd ' + mysterioPath + ' && git ls-remote origin refs/heads/master', (error, stdout) => {
+            if (rejectError(error, reject))
                 return;
-            console.log(stdout);
             var remoteHead = stdout.split('\t')[0];
-            console.log(remoteHead);
-            exec('git rev-parse HEAD', (error, stdout, stderror) => {
-                if (rejectError(error || stderror, reject))
+            exec('git rev-parse HEAD', (error, stdout) => {
+                if (rejectError(error, reject))
                     return;
-                console.log(stdout);
                 var localHead = stdout;
-                exec('cd ..', (error, stdout, stderror) => {
-                    if (rejectError(error || stderror, reject))
+                exec('cd ..', (error) => {
+                    if (rejectError(error, reject))
                         return;
                     if (localHead !== remoteHead) {
-                        exec('git submodule foreach git pull origin master && git add . && git commit -am "Update Mysterio to latest"', (error, stdout, stderror) => {
-                            if (rejectError(error || stderror, reject))
+                        exec('git submodule foreach git pull origin master && git add', (error) => {
+                            if (rejectError(error, reject))
                                 return;
-                            console.log("Mysterio updated");
+                            fse.copySync(path.resolve(mysterioPath, './frontend/jsconfig.json'), path.resolve(rootPath, './jsconfig.json'));
+                            fse.copySync(path.resolve(mysterioPath, './frontend/src'), path.resolve(rootPath, './src'));
+                            fse.copySync(path.resolve(mysterioPath, './frontend/public'), path.resolve(rootPath, './public'));
                             resolve();
                         });
+                    } else {
+                        resolve();
                     }
-
                 });
             });
         });
@@ -60,7 +61,7 @@ function execPostReactBuild(buildFolderPath, outputFolderPath) {
         if (fs.existsSync(buildFolderPath)) {
             if (fs.existsSync(outputFolderPath)) {
                 rimraf(outputFolderPath, (err) => {
-                    if (rejectError(error || stderror, reject))
+                    if (rejectError(err, reject))
                         return;
                     renameOutputFolder(buildFolderPath, outputFolderPath)
                         .then(val => resolve(val))
@@ -77,10 +78,10 @@ function execPostReactBuild(buildFolderPath, outputFolderPath) {
     });
 }
 
-const P = () => {
+module.exports = () => {
     const projectPath = path.resolve(process.cwd(), './node_modules/.bin/react-scripts');
     return new Promise((resolve, reject) => {
-        execPostReactBuild(path.resolve(__dirname, '../Mysterio'), path.join(__dirname, '../'))
+        execPreReactBuild(path.resolve(__dirname, '../Mysterio'), path.join(__dirname, '../'))
             .then(() => {
                 exec(`${projectPath} build`, (error) => {
                     if (rejectError(error, reject))
@@ -102,6 +103,3 @@ const P = () => {
             });
     });
 };
-
-
-P().then(() => console.log("complete")).catch((error) => console.error(error));
