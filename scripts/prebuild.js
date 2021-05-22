@@ -1,3 +1,4 @@
+const process = require('process');
 const path = require('path');
 const { exec } = require('child_process');
 const fs = require('fs');
@@ -24,9 +25,16 @@ function rejectError(error, reject) {
     return false;
 }
 
+function isDevEnv() {
+    return process.env.NODE_ENV === 'development';
+}
 
 function execPreReactBuild(mysterioPath, rootPath) {
     return new Promise((resolve, reject) => {
+        if (isDevEnv()) {
+            console.log("Dev Environment. No Pre-React Build required.");
+            return resolve();
+        }
         exec('cd ' + mysterioPath + ' && git ls-remote origin refs/heads/master', (error, stdout) => {
             if (rejectError(error, reject))
                 return;
@@ -39,12 +47,13 @@ function execPreReactBuild(mysterioPath, rootPath) {
                     if (rejectError(error, reject))
                         return;
                     if (localHead !== remoteHead) {
-                        exec('git submodule foreach git pull origin master && git add', (error) => {
+                        exec('git submodule foreach git pull origin master', (error) => {
                             if (rejectError(error, reject))
                                 return;
                             fse.copySync(path.resolve(mysterioPath, './frontend/jsconfig.json'), path.resolve(rootPath, './jsconfig.json'));
                             fse.copySync(path.resolve(mysterioPath, './frontend/src'), path.resolve(rootPath, './src'));
                             fse.copySync(path.resolve(mysterioPath, './frontend/public'), path.resolve(rootPath, './public'));
+                            console.log('Mysterio updated');
                             resolve();
                         });
                     } else {
