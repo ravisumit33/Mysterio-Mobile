@@ -51,6 +51,8 @@ function execPreReactBuild(mysterioPath, rootPath) {
                             if (rejectError(error, reject))
                                 return;
                             fse.copySync(path.resolve(mysterioPath, './frontend/jsconfig.json'), path.resolve(rootPath, './jsconfig.json'));
+                            fse.removeSync(path.resolve(rootPath, './src'));
+                            fse.removeSync(path.resolve(rootPath, './public'));
                             fse.copySync(path.resolve(mysterioPath, './frontend/src'), path.resolve(rootPath, './src'));
                             fse.copySync(path.resolve(mysterioPath, './frontend/public'), path.resolve(rootPath, './public'));
                             console.log('Mysterio updated');
